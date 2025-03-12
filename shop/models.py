@@ -37,7 +37,7 @@ class Sale(models.Model):
     total = models.DecimalField(max_digits=6, decimal_places=2)
 
     def __str__(self):
-        return f"Sale {self.id} - {self.client.name} ({self.date}) ({self.total})"
+        return f"Sale {self.id} - {self.client.name} ({self.date.strftime('%H:%M:%S')}) ({self.total})"
 
 class Details(models.Model):
     id = models.AutoField(primary_key=True)
