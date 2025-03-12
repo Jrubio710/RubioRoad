@@ -27,8 +27,8 @@ class Client(models.Model):
     plate = models.CharField(max_length=10, unique=True)
 
     def __str__(self):
-        return f"{self.name} ({self.phone}) ({self.plate})"
-
+        return f"Name: {self.name} {self.plate}"
+    
 class Sale(models.Model):
     id = models.AutoField(primary_key=True)
     client = models.ForeignKey(Client, related_name='sales', on_delete=models.CASCADE)

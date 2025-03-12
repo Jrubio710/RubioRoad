@@ -6,3 +6,6 @@ admin.site.register(Tire)
 admin.site.register(Client)
 admin.site.register(Sale)
 admin.site.register(Details)
+
+
+    
