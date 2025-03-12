@@ -34,17 +34,29 @@ class Sale(models.Model):
     client = models.ForeignKey(Client, related_name='sales', on_delete=models.CASCADE)
     employer = models.ForeignKey(Employer, related_name='sales', on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
-    total = models.DecimalField(max_digits=6, decimal_places=2)
+    total = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
     def __str__(self):
         return f"Sale {self.id} - {self.client.name} ({self.date.strftime('%H:%M:%S')}) ({self.total})"
+    def update_total(self):
+        """Actualiza el total de la venta sumando los subtotales de los detalles."""
+        total = sum(detail.subtotal for detail in self.details.all())
+        self.total = total
+        self.save()
 
 class Details(models.Model):
     id = models.AutoField(primary_key=True)
     sale = models.ForeignKey(Sale, related_name='details', on_delete=models.CASCADE)
     tire = models.ForeignKey(Tire, related_name='details', on_delete=models.CASCADE)
     quantity = models.IntegerField()
-    subtotal = models.DecimalField(max_digits=6, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
-    def __str__(self):
-        return f"Details for Sale {self.sale.id} - {self.tire.model} ({self.quantity}) ({self.subtotal})"
+    def save(self, *args, **kwargs):
+        """Calcula el subtotal y actualiza el stock del neumático cuando se guarda el detalle."""
+        self.subtotal = self.tire.price * self.quantity
+        self.tire.stock -= self.quantity
+        self.tire.save()  
+        super().save(*args, **kwargs)
+        
+        # Luego actualizamos el total de la venta
+        self.sale.update_total()
